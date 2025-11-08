@@ -1,3 +1,8 @@
+### INF601 - Advanced Programming in Python
+### Alexander Escobedo
+### Mini Project 4
+
+
 import datetime
 from django.db import models
 from django.utils import timezone

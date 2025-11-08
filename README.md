@@ -9,7 +9,7 @@
  
 ## Description
 
-Event RSVP is a Django web applicatin that allows users to create, manage and RSVP to community events. It has secure user registration and login, event creation with details like date and location, an RSVP system with status options, and an organizer dashboard to track attendees. This app uses Bootstrap for design and includes admin customization for easy event management.
+Event RSVP is a Django web application that allows users to create, manage, and RSVP to community events. It has secure user registration and login, event creation with details like date and location, an RSVP system with status options, and an organizer dashboard to track attendees. This app uses Bootstrap for design and includes admin customization for easy event management.
 
 
 
@@ -52,6 +52,8 @@ pip install -r requirements.txt
 ### Executing program
 #### Initialize the database:
 
+Ensure your current working directory is the Event_RSVP_App directory before running these commands
+
 generates SQL commands to enter into the database
 ```
 python manage.py makemigrations
@@ -88,31 +90,25 @@ If you are using an IDE like PyCharm or VS Code:
 
 This lets you run and debug the Django app with one click.
 
+* If you are using another program that utilizes prot 8000, you may change the port number by editing configurations and entering a port number that is not in use (8001 for example)
+
+### Project Pages
+
+
 
 ## Authors
  
-Contributors names and contact info
- 
-ex. Dominique Pizzie  
-ex. [@DomPizzie](https://twitter.com/dompizzie)
+Alexander Escobedo 
+
  
 ## Version History
- 
-* 0.2
-    * Various bug fixes and optimizations
-    * See [commit change]() or See [release history]()
+
 * 0.1
     * Initial Release
  
-## License
- 
-This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
- 
 ## Acknowledgments
- 
-Inspiration, code snippets, etc.
+
 * [Django Documentation](https://docs.djangoproject.com/en/5.2/)
 * [Bootstrap Documentation](https://getbootstrap.com/docs/5.3/getting-started/download/)
 * [The Official Django Tutorial ](https://docs.djangoproject.com/en/5.2/intro/tutorial01/)- Project structure adapted from this tutorial (django version 5.2)
 * [SQLite Documentation](https://sqlite.org/docs.html)
-* [fvcproductions](https://gist.github.com/fvcproductions/1bfc2d4aecb01a834b46)

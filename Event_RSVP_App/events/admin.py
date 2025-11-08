@@ -2,23 +2,17 @@
 ### Alexander Escobedo
 ### Mini Project 4
 
-
 from django.contrib import admin
+from .models import Event, RSVP
 
-from .models import Choice, Question
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    list_display = ('title', 'date_time', 'organizer', 'capacity')
+    list_filter = ('date_time', 'organizer')
+    search_fields = ('title', 'location', 'organizer__username')
 
-class ChoiceInline(admin.TabularInline):
-    model = Choice
-    extra = 4
-
-class QuestionAdmin(admin.ModelAdmin):
-    fieldsets = [
-        (None, {"fields": ["question_text"]}),
-        ("Date information", {"fields": ["pub_date"], "classes": ["collapse"]}),
-    ]
-    list_display = ["question_text", "pub_date", "was_published_recently"]
-    list_filter = ["pub_date"]
-    inlines = [ChoiceInline]
-    search_fields = ["question_text"]
-
-admin.site.register(Question, QuestionAdmin)
+@admin.register(RSVP)
+class RSVPAdmin(admin.ModelAdmin):
+    list_display = ('event', 'user', 'status', 'timestamp')
+    list_filter = ('status', 'timestamp')
+    search_fields = ('event__title', 'user__username')

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Attendees for {{ event.title }}</h1>
+
+<ul class="list-group">
+  {% for rsvp in rsvps %}
+    <li class="list-group-item">
+      {{ rsvp.user.username }} — {{ rsvp.status }} ({{ rsvp.timestamp }})
+    </li>
+  {% empty %}
+    <li>No attendees yet.</li>
+  {% endfor %}
+</ul>
+
+<a href="{% url 'events:my_events' %}" class="btn btn-secondary mt-3">Back to My Events</a>
+{% endblock %}

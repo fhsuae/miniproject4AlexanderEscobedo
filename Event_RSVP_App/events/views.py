@@ -2,68 +2,97 @@
 ### Alexander Escobedo
 ### Mini Project 4
 
-
+from django.contrib.auth.decorators import login_required
 from django.db.models import F
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
+from django.utils.decorators import method_decorator
 
-from .models import Choice, Question
+from .models import Event, RSVP
+from .forms import EventForm, RSVPForm  # You'll create these forms
 
-
+# Home page: List all upcoming events
 class IndexView(generic.ListView):
+    model = Event
     template_name = "events/index.html"
-    context_object_name = "latest_question_list"
+    context_object_name = "event_list"
 
     def get_queryset(self):
-        """Return the last five published questions."""
-        return Question.objects.order_by("-pub_date")[:5]
+        return Event.objects.order_by("date_time")
 
 
-class DetailView(generic.DetailView):
-    model = Question
-    template_name = "events/detail.html"
+# Event detail + RSVP form
+def detail(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
 
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            return redirect('login')  # redirect to login if not logged in
 
-class ResultsView(generic.DetailView):
-    model = Question
-    template_name = "events/results.html"
-
-def index(request):
-    latest_question_list = Question.objects.order_by("-pub_date")[:5]
-    context = {"latest_question_list": latest_question_list}
-    return render(request, "events/index.html", context)
-
-
-def detail(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    return render(request, "events/detail.html", {"question": question})
-
-
-def results(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    return render(request, "events/results.html", {"question": question})
-
-
-def vote(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    try:
-        selected_choice = question.choice_set.get(pk=request.POST["choice"])
-    except (KeyError, Choice.DoesNotExist):
-        # Redisplay the question voting form.
-        return render(
-            request,
-            "events/detail.html",
-            {
-                "question": question,
-                "error_message": "You didn't select a choice.",
-            },
-        )
+        form = RSVPForm(request.POST)
+        if form.is_valid():
+            # Save or update RSVP for current user and event
+            rsvp, created = RSVP.objects.update_or_create(
+                event=event,
+                user=request.user,
+                defaults={"status": form.cleaned_data["status"]},
+            )
+            return HttpResponseRedirect(reverse("events:detail", args=[event_id]))
     else:
-        selected_choice.votes = F("votes") + 1
-        selected_choice.save()
-        # Always return an HttpResponseRedirect after successfully dealing
-        # with POST data. This prevents data from being posted twice if a
-        # user hits the Back button.
-        return HttpResponseRedirect(reverse("events:results", args=(question.id,)))
+        form = RSVPForm()
+
+    # Check if the current user already RSVP'd
+    user_rsvp = None
+    if request.user.is_authenticated:
+        try:
+            user_rsvp = RSVP.objects.get(event=event, user=request.user)
+        except RSVP.DoesNotExist:
+            user_rsvp = None
+
+    context = {
+        "event": event,
+        "form": form,
+        "user_rsvp": user_rsvp,
+    }
+    return render(request, "events/detail.html", context)
+
+
+# Create Event - only for logged-in users
+@method_decorator(login_required, name='dispatch')
+class CreateEventView(generic.View):
+    def get(self, request):
+        form = EventForm()
+        return render(request, "events/create_event.html", {"form": form})
+
+    def post(self, request):
+        form = EventForm(request.POST)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.organizer = request.user
+            event.save()
+            return redirect("events:detail", event_id=event.id)
+        return render(request, "events/create_event.html", {"form": form})
+
+
+# Organizer's dashboard to see their events
+@method_decorator(login_required, name='dispatch')
+class MyEventsView(generic.ListView):
+    model = Event
+    template_name = "events/my_events.html"
+    context_object_name = "my_events"
+
+    def get_queryset(self):
+        return Event.objects.filter(organizer=self.request.user).order_by("date_time")
+
+
+# Attendees list for an event (only organizer)
+@login_required
+def attendees(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+    if event.organizer != request.user:
+        return HttpResponseRedirect(reverse("events:index"))
+
+    rsvps = RSVP.objects.filter(event=event).order_by("-timestamp")
+    return render(request, "events/attendees.html", {"event": event, "rsvps": rsvps})

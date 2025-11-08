@@ -1,12 +1,26 @@
-<form action="{% url 'events:vote' question.id %}" method="post">
-{% csrf_token %}
-<fieldset>
-    <legend><h1>{{ question.question_text }}</h1></legend>
-    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-    {% for choice in question.choice_set.all %}
-        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
-    {% endfor %}
-</fieldset>
-<input type="submit" value="Vote">
-</form>
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h1>{{ event.title }}</h1>
+<p>{{ event.description }}</p>
+<p><strong>Date & Time:</strong> {{ event.date_time }}</p>
+<p><strong>Location:</strong> {{ event.location }}</p>
+<p><strong>Capacity:</strong> {{ event.capacity }}</p>
+
+{% if user.is_authenticated %}
+  <h3>RSVP</h3>
+
+  {% if user_rsvp %}
+    <p>Your RSVP status: <strong>{{ user_rsvp.status }}</strong></p>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Submit RSVP</button>
+  </form>
+{% else %}
+  <p><a href="{% url 'login' %}">Log in</a> to RSVP for this event.</p>
+{% endif %}
+{% endblock %}

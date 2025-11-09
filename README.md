@@ -150,8 +150,11 @@ python manage.py runserver 8001
 ### Events Page
 ![RSVP Page](Event_RSVP_App/screenshots/EventsPage.png)
 
-### Login Page
-![Login Page](Event_RSVP_App/screenshots/LoginPage.png)
+### Admin Page
+![Admin Page](Event_RSVP_App/screenshots/AdminPage.png)
+
+### RSVP Example
+![RSVP Example](Event_RSVP_App/screenshots/RSVPExample.png)
 
 ## Authors
  

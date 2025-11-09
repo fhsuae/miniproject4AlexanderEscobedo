@@ -96,6 +96,21 @@ Open your web browser and go to:
 http://127.0.0.1:8000/
 ```
 
+### Admin Access
+To access the Django admin dashboard:
+1. Go to:
+```
+http://127.0.0.1:8000/admin/
+```
+2. Log in using the credentials from: 
+```
+python manage.py createsuperuser
+```
+3. You can manage:
+* Events 
+* RSVPs 
+* Users
+
 ### Using an IDE (Optional)
 If you are using an IDE like PyCharm or VS Code:
 * Open the project folder
@@ -129,13 +144,13 @@ python manage.py runserver 8001
 ## Screenshots
 
 ### Home Page
-![Home Page](screenshots/HomePage.png)
+![Home Page](Event_RSVP_App/screenshots/HomePage.png)
 
-### RSVP Page
-![RSVP Page](screenshots/RSVP.png)
+### Events Page
+![RSVP Page](Event_RSVP_App/screenshots/EventsPage.png)
 
 ### Login Page
-![Login Page](screenshots/Login.png)
+![Login Page](Event_RSVP_App/screenshots/LoginPage.png)
 
 ## Authors
  

@@ -16,6 +16,10 @@ from django.contrib.auth import login as auth_login
 from .models import Event, RSVP
 from .forms import EventForm, RSVPForm  # You'll create these forms
 
+def home(request):
+    return render(request, "home.html")
+
+
 # Home page: List all upcoming events
 class IndexView(generic.ListView):
     model = Event

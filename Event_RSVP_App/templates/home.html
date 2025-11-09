@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center mt-5">
+  <h1>Welcome to the Event RSVP App</h1>
+  <p class="lead">Create and manage events, RSVP to others, and view attendees — all in one place.</p>
+  <a href="{% url 'events:index' %}" class="btn btn-primary btn-lg mt-3">View Events</a>
+  <button type="button" class="btn btn-info btn-lg mt-3" data-bs-toggle="modal" data-bs-target="#aboutModal">
+    Learn More
+  </button>
+</div>
+{% endblock %}

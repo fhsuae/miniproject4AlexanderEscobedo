@@ -36,7 +36,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "events.apps.PollsConfig",
+    "events.apps.EventsConfig",  # <-- Fixed app config name here
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -122,6 +122,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Removed STATICFILES_DIRS since your static files live inside app folders
+
 
 LOGIN_REDIRECT_URL = '/'
 

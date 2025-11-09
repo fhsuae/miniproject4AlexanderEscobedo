@@ -42,6 +42,7 @@ Before running the project, ensure you have:
 https://github.com/fhsuae/miniproject4AlexanderEscobedo.git
 ```
 2. Create and activate a virtual environment:
+
 Windows:
 
 ```

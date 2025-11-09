@@ -82,12 +82,29 @@ document.getElementById('createEventForm').addEventListener('submit', function(e
   })
   .then(data => {
     if (data.success) {
+      // Close the modal on success
+      const modal = bootstrap.Modal.getInstance(document.getElementById('createEventModal'));
+      modal.hide();
+
+      // Show success message and reload page
+      alert("Event created successfully!");
       location.reload();
     }
   })
   .catch(errorData => {
-    alert("Failed to create event. Please check your input.");
-    console.error(errorData.errors);
+    // ✅ IMPROVED ERROR HANDLING: Show specific form errors
+    if (errorData.errors) {
+      let errorMsg = "Please fix the following errors:\n\n";
+      for (let field in errorData.errors) {
+        // Format field names to be more user-friendly
+        const fieldName = field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        errorMsg += `• ${fieldName}: ${errorData.errors[field].join(', ')}\n`;
+      }
+      alert(errorMsg);
+    } else {
+      alert("Failed to create event. Please check your input and try again.");
+    }
+    console.error("AJAX Error:", errorData);
   });
 });
 </script>

@@ -66,6 +66,7 @@ def detail(request, event_id):
                 user=request.user,
                 defaults={"status": desired_status},
             )
+            messages.success(request, "Your RSVP has been updated!")  # Added success message
             return HttpResponseRedirect(reverse("events:detail", args=[event_id]))
     else:
         form = RSVPForm()
@@ -96,6 +97,7 @@ class CreateEventView(generic.View):
             event = form.save(commit=False)
             event.organizer = request.user
             event.save()
+            messages.success(request, "Event created successfully!")  # Added success message
             return redirect("events:detail", event_id=event.id)
         return render(request, "events/create_event.html", {"form": form})
 
@@ -107,6 +109,7 @@ def create_event_ajax(request):
         event = form.save(commit=False)
         event.organizer = request.user
         event.save()
+        messages.success(request, "Event created successfully!")  # Added success message
         return JsonResponse({"success": True})
     else:
         return JsonResponse({"success": False, "errors": form.errors}, status=400)

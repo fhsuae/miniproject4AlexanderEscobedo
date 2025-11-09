@@ -4,11 +4,12 @@
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import F
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_POST
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login as auth_login
@@ -19,8 +20,6 @@ from .forms import EventForm, RSVPForm  # You'll create these forms
 def home(request):
     return render(request, "home.html")
 
-
-# Home page: List all upcoming events
 class IndexView(generic.ListView):
     model = Event
     template_name = "events/index.html"
@@ -29,18 +28,15 @@ class IndexView(generic.ListView):
     def get_queryset(self):
         return Event.objects.order_by("date_time")
 
-
-# Event detail + RSVP form
 def detail(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
 
     if request.method == "POST":
         if not request.user.is_authenticated:
-            return redirect('login')  # redirect to login if not logged in
+            return redirect('login')
 
         form = RSVPForm(request.POST)
         if form.is_valid():
-            # Save or update RSVP for current user and event
             rsvp, created = RSVP.objects.update_or_create(
                 event=event,
                 user=request.user,
@@ -50,7 +46,6 @@ def detail(request, event_id):
     else:
         form = RSVPForm()
 
-    # Check if the current user already RSVP'd
     user_rsvp = None
     if request.user.is_authenticated:
         try:
@@ -65,8 +60,6 @@ def detail(request, event_id):
     }
     return render(request, "events/detail.html", context)
 
-
-# Create Event - only for logged-in users
 @method_decorator(login_required, name='dispatch')
 class CreateEventView(generic.View):
     def get(self, request):
@@ -82,8 +75,19 @@ class CreateEventView(generic.View):
             return redirect("events:detail", event_id=event.id)
         return render(request, "events/create_event.html", {"form": form})
 
+# New AJAX view for modal event creation
+@login_required
+@require_POST
+def create_event_ajax(request):
+    form = EventForm(request.POST)
+    if form.is_valid():
+        event = form.save(commit=False)
+        event.organizer = request.user
+        event.save()
+        return JsonResponse({"success": True})
+    else:
+        return JsonResponse({"success": False, "errors": form.errors}, status=400)
 
-# Organizer's dashboard to see their events
 @method_decorator(login_required, name='dispatch')
 class MyEventsView(generic.ListView):
     model = Event
@@ -93,8 +97,6 @@ class MyEventsView(generic.ListView):
     def get_queryset(self):
         return Event.objects.filter(organizer=self.request.user).order_by("date_time")
 
-
-# Attendees list for an event (only organizer)
 @login_required
 def attendees(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
@@ -109,7 +111,7 @@ def signup(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            auth_login(request, user)  # Log the user in after signup
+            auth_login(request, user)
             return redirect('events:index')
     else:
         form = UserCreationForm()

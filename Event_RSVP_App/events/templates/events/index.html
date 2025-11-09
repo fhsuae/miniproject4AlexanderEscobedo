@@ -2,7 +2,10 @@
 {% block content %}
 <h1>Upcoming Events</h1>
 
-<a href="{% url 'events:create_event' %}" class="btn btn-primary mb-3">Create New Event</a>
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createEventModal">
+  Create New Event
+</button>
 
 <ul class="list-group">
   {% for event in event_list %}
@@ -13,4 +16,80 @@
     <li>No events available.</li>
   {% endfor %}
 </ul>
+
+<!-- Create Event Modal -->
+<div class="modal fade" id="createEventModal" tabindex="-1" aria-labelledby="createEventModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="createEventForm" method="post" novalidate>
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="createEventModalLabel">Create New Event</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Render form fields manually or use {{ form.as_p }} after injecting form in context -->
+          <div class="mb-3">
+            <label for="id_title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="id_title" name="title" required>
+          </div>
+          <div class="mb-3">
+            <label for="id_description" class="form-label">Description</label>
+            <textarea class="form-control" id="id_description" name="description" rows="3" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="id_date_time" class="form-label">Date and Time</label>
+            <input type="datetime-local" class="form-control" id="id_date_time" name="date_time" required>
+          </div>
+          <div class="mb-3">
+            <label for="id_location" class="form-label">Location</label>
+            <input type="text" class="form-control" id="id_location" name="location" required>
+          </div>
+          <div class="mb-3">
+            <label for="id_capacity" class="form-label">Capacity</label>
+            <input type="number" class="form-control" id="id_capacity" name="capacity" min="1" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('createEventForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const form = e.target;
+  const formData = new FormData(form);
+
+  fetch("{% url 'events:create_event_ajax' %}", {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+    },
+    body: formData,
+  })
+  .then(response => {
+    if (!response.ok) {
+      return response.json().then(data => { throw data; });
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data.success) {
+      // Reload the page to show new event in list
+      location.reload();
+    }
+  })
+  .catch(errorData => {
+    // Handle form errors
+    alert("Failed to create event. Please check your input.");
+    console.error(errorData.errors);
+  });
+});
+</script>
 {% endblock %}

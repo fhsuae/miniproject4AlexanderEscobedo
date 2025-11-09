@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.views import generic
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
+from django.contrib import messages  # Added for flash messages
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login as auth_login
@@ -34,16 +35,36 @@ class IndexView(generic.ListView):
 def detail(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
 
+    # Count current "Going" RSVPs
+    going_count = RSVP.objects.filter(event=event, status='Going').count()
+
     if request.method == "POST":
         if not request.user.is_authenticated:
             return redirect('login')
 
         form = RSVPForm(request.POST)
         if form.is_valid():
+            desired_status = form.cleaned_data["status"]
+            user_already_rsvp = RSVP.objects.filter(event=event, user=request.user).first()
+
+            # Check if event is full and user is trying to RSVP "Going"
+            # Allow changing RSVP if user already going (e.g. can change to not going)
+            if desired_status == "Going":
+                if going_count >= event.capacity:
+                    if not (user_already_rsvp and user_already_rsvp.status == "Going"):
+                        messages.error(request, "Sorry, this event is already at full capacity.")
+                        context = {
+                            "event": event,
+                            "form": form,
+                            "user_rsvp": user_already_rsvp,
+                        }
+                        return render(request, "events/detail.html", context)
+
+            # Save or update RSVP
             rsvp, created = RSVP.objects.update_or_create(
                 event=event,
                 user=request.user,
-                defaults={"status": form.cleaned_data["status"]},
+                defaults={"status": desired_status},
             )
             return HttpResponseRedirect(reverse("events:detail", args=[event_id]))
     else:

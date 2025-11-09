@@ -3,6 +3,14 @@
 
 {% block content %}
 <h1>{{ event.title }}</h1>
+
+<!-- Display messages (errors, success, etc.) -->
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
 <p>{{ event.description }}</p>
 <p><strong>Date & Time:</strong> {{ event.date_time }}</p>
 <p><strong>Location:</strong> {{ event.location }}</p>

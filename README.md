@@ -9,30 +9,39 @@
  
 ## Description
 
-Event RSVP is a Django web application that allows users to create, manage, and RSVP to community events. It has secure user registration and login, event creation with details like date and location, an RSVP system with status options, and an organizer dashboard to track attendees. This app uses Bootstrap for design and includes admin customization for easy event management.
+Event RSVP is a Django web application that allows users to create, manage, and RSVP to community events.  
+It features secure user registration and login, event creation with details like date and location, an RSVP system with status options, and an organizer dashboard to track attendees.  
+This app uses **Bootstrap** for design and includes a **Bootstrap modal**, **Django Admin customization**, and an **RSVP attendee counter** for clear event management.
 
 
+## Features 
+* Secure user registration and authentication
+* Create, edit, and view events with date, time, and location
+* RSVP to events with "Going", "Maybe", or "Not Going" status
+* View attendee counts and capacity limits
+* Admin customization for easy management
+* Bootstrap-styled UI with responsive design and modals
 
 
 ## Getting Started
  
 ### Dependencies
-Prerequisites
 Before running the project, ensure you have:
 
 * Python 3.10+ installed
 * pip package manager
 * SQLite (bundled with Python)
-* Required Python packages (install via requirements.txt)
+* Required Python packages (install via `requirements.txt`)
 
-* (tzdata package may also be added if using Windows)
+* *(If using Windows: tzdata package may also be required)*
+
 ### Installing
-Clone the repository:
+1. Clone the repository:
 
 ```
 https://github.com/fhsuae/miniproject4AlexanderEscobedo.git
 ```
-Create and activate a virtual environment:
+2. Create and activate a virtual environment:
 Windows:
 
 ```
@@ -44,7 +53,7 @@ macOS/Linux:
 python3 -m venv venv
 source venv/bin/activate
 ```
- Install dependencies:
+3. Install dependencies:
 
 ```
 pip install -r requirements.txt
@@ -52,27 +61,36 @@ pip install -r requirements.txt
 ### Executing program
 #### Initialize the database:
 
-Ensure your current working directory is the Event_RSVP_App directory before running these commands
+Ensure your working directory is the main Django project folder (`Event_RSVP_App/`)
 
-generates SQL commands to enter into the database
+1. Generate database migration files:
 ```
 python manage.py makemigrations
 ```
+> Django inspects your models and creates migration files — these are instructions for creating or updating database tables.
 
-generates SQL commands to apply changes to database
+
+2. Apply migrations to the database:
 ```
 python manage.py migrate
 ```
+> Executes the migration files, creating or updating the actual database schema in SQLite.
 
-Creating admin user  
+
+3. Create an admin (superuser) account:
 ```
 python manage.py createsuperuser
 ```
+> Creates a new administrative user to access Django’s built-in admin dashboard. You’ll be prompted for a username, email, and password.
 
-Run the django development server
+
+4. Start the Django development server:
 ```
 python manage.py runserver
 ```
+> Starts Django’s built-in web server so you can view and interact with your app locally.
+
+
 Open your web browser and go to:
 ```
 http://127.0.0.1:8000/
@@ -83,18 +101,41 @@ If you are using an IDE like PyCharm or VS Code:
 * Open the project folder
 * Go to Edit Configurations → Add New Configuration → Django Server.
 * Set working directory to the project folder
-* Enable Django Support (if using Pycharm) and set root point to app directory 
-* Point to Setting.py file in app/mysite/setting.py
-* Set Manage script to manage.py file in app/manage.py 
+* Enable Django Support (if using Pycharm) and set root point to Event_RSVP_App directory 
+* Point to settings.py file in Event_RSVP_App/mysite/settings.py
+* Set Manage script to manage.py file in Event_RSVP_App/manage.py 
 * Click the Run ▶️ button to start the development server.
 
 This lets you run and debug the Django app with one click.
 
-* If you are using another program that utilizes port 8000, you may change the port number by editing configurations and entering a port number that is not in use (8001 for example)
+If you are using another program that utilizes port 8000, you may change the port number by editing configurations and entering a port number that is not in use (8001 for example).
+
+You may also use this command: 
+
+```
+python manage.py runserver 8001
+```
+
 
 ### Project Pages
 
+* **Home Page**: Event list and navigation
+* **Event Details**: Information and RSVP options
+* **Create Event**: Form to add new events
+* **My Events**: Events created by the logged-in user
+* **Attendees Dashboard**: Organizer view of RSVPs
+* **Login / Signup**: Authentication pages
 
+## Screenshots
+
+### Home Page
+![Home Page](screenshots/HomePage.png)
+
+### RSVP Page
+![RSVP Page](screenshots/RSVP.png)
+
+### Login Page
+![Login Page](screenshots/Login.png)
 
 ## Authors
  

@@ -90,7 +90,7 @@ If you are using an IDE like PyCharm or VS Code:
 
 This lets you run and debug the Django app with one click.
 
-* If you are using another program that utilizes prot 8000, you may change the port number by editing configurations and entering a port number that is not in use (8001 for example)
+* If you are using another program that utilizes port 8000, you may change the port number by editing configurations and entering a port number that is not in use (8001 for example)
 
 ### Project Pages
 
@@ -110,5 +110,5 @@ Alexander Escobedo
 
 * [Django Documentation](https://docs.djangoproject.com/en/5.2/)
 * [Bootstrap Documentation](https://getbootstrap.com/docs/5.3/getting-started/download/)
-* [The Official Django Tutorial ](https://docs.djangoproject.com/en/5.2/intro/tutorial01/)- Project structure adapted from this tutorial (django version 5.2)
+* [The Official Django Tutorial ](https://docs.djangoproject.com/en/5.2/intro/tutorial01/)- Project structure adapted from this tutorial (Django version 5.2)
 * [SQLite Documentation](https://sqlite.org/docs.html)

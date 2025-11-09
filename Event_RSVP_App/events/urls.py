@@ -2,6 +2,7 @@
 ### Alexander Escobedo
 ### Mini Project 4
 
+
 from django.urls import path
 from . import views
 

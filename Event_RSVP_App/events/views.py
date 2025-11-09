@@ -10,6 +10,9 @@ from django.urls import reverse
 from django.views import generic
 from django.utils.decorators import method_decorator
 
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login as auth_login
+
 from .models import Event, RSVP
 from .forms import EventForm, RSVPForm  # You'll create these forms
 
@@ -96,3 +99,14 @@ def attendees(request, event_id):
 
     rsvps = RSVP.objects.filter(event=event).order_by("-timestamp")
     return render(request, "events/attendees.html", {"event": event, "rsvps": rsvps})
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            auth_login(request, user)  # Log the user in after signup
+            return redirect('events:index')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/signup.html', {'form': form})

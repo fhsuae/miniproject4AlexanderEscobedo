@@ -3,7 +3,7 @@
 ### Mini Project 4
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import F
+from django.db.models import F, Q, Count
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
@@ -26,7 +26,10 @@ class IndexView(generic.ListView):
     context_object_name = "event_list"
 
     def get_queryset(self):
-        return Event.objects.order_by("date_time")
+        # Annotate events with count of attendees who RSVP'd "Going"
+        return Event.objects.annotate(
+            attendee_count=Count('rsvp', filter=Q(rsvp__status='Going'))
+        ).order_by("date_time")
 
 def detail(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
@@ -75,7 +78,6 @@ class CreateEventView(generic.View):
             return redirect("events:detail", event_id=event.id)
         return render(request, "events/create_event.html", {"form": form})
 
-# New AJAX view for modal event creation
 @login_required
 @require_POST
 def create_event_ajax(request):

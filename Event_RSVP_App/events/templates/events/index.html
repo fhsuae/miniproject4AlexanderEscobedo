@@ -11,6 +11,8 @@
   {% for event in event_list %}
     <li class="list-group-item">
       <a href="{% url 'events:detail' event.id %}">{{ event.title }}</a> — {{ event.date_time }}
+      <br>
+      <small>Attendees: {{ event.attendee_count }}</small>
     </li>
   {% empty %}
     <li>No events available.</li>
@@ -28,7 +30,6 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <!-- Render form fields manually or use {{ form.as_p }} after injecting form in context -->
           <div class="mb-3">
             <label for="id_title" class="form-label">Title</label>
             <input type="text" class="form-control" id="id_title" name="title" required>
@@ -81,12 +82,10 @@ document.getElementById('createEventForm').addEventListener('submit', function(e
   })
   .then(data => {
     if (data.success) {
-      // Reload the page to show new event in list
       location.reload();
     }
   })
   .catch(errorData => {
-    // Handle form errors
     alert("Failed to create event. Please check your input.");
     console.error(errorData.errors);
   });

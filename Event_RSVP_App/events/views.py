@@ -10,18 +10,20 @@ from django.urls import reverse
 from django.views import generic
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
-from django.contrib import messages  # Added for flash messages
+from django.contrib import messages  # For flash messages
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login as auth_login
 
 from .models import Event, RSVP
-from .forms import EventForm, RSVPForm  # You'll create these forms
+from .forms import EventForm, RSVPForm  # Forms for creating events and RSVPs
 
 def home(request):
+    """Render the home page."""
     return render(request, "home.html")
 
 class IndexView(generic.ListView):
+    """Display a list of upcoming events with attendee counts."""
     model = Event
     template_name = "events/index.html"
     context_object_name = "event_list"
@@ -33,12 +35,17 @@ class IndexView(generic.ListView):
         ).order_by("date_time")
 
 def detail(request, event_id):
+    """
+    Display event details and handle RSVP submissions.
+    Only authenticated users can RSVP.
+    """
     event = get_object_or_404(Event, pk=event_id)
 
-    # Count current "Going" RSVPs
+    # Count current "Going" RSVPs to check capacity
     going_count = RSVP.objects.filter(event=event, status='Going').count()
 
     if request.method == "POST":
+        # Redirect to login if user is not authenticated
         if not request.user.is_authenticated:
             return redirect('login')
 
@@ -47,10 +54,10 @@ def detail(request, event_id):
             desired_status = form.cleaned_data["status"]
             user_already_rsvp = RSVP.objects.filter(event=event, user=request.user).first()
 
-            # Check if event is full and user is trying to RSVP "Going"
-            # Allow changing RSVP if user already going (e.g. can change to not going)
+            # If trying to RSVP "Going", check capacity and allow changes
             if desired_status == "Going":
                 if going_count >= event.capacity:
+                    # Allow if user is already "Going" to change status
                     if not (user_already_rsvp and user_already_rsvp.status == "Going"):
                         messages.error(request, "Sorry, this event is already at full capacity.")
                         context = {
@@ -60,17 +67,18 @@ def detail(request, event_id):
                         }
                         return render(request, "events/detail.html", context)
 
-            # Save or update RSVP
+            # Save or update RSVP record
             rsvp, created = RSVP.objects.update_or_create(
                 event=event,
                 user=request.user,
                 defaults={"status": desired_status},
             )
-            messages.success(request, "Your RSVP has been updated!")  # Added success message
+            messages.success(request, "Your RSVP has been updated!")
             return HttpResponseRedirect(reverse("events:detail", args=[event_id]))
     else:
         form = RSVPForm()
 
+    # Get existing RSVP for user to show in the template
     user_rsvp = None
     if request.user.is_authenticated:
         try:
@@ -87,6 +95,8 @@ def detail(request, event_id):
 
 @method_decorator(login_required, name='dispatch')
 class CreateEventView(generic.View):
+    """View to display the create event form and handle its submission (non-AJAX)."""
+
     def get(self, request):
         form = EventForm()
         return render(request, "events/create_event.html", {"form": form})
@@ -97,47 +107,72 @@ class CreateEventView(generic.View):
             event = form.save(commit=False)
             event.organizer = request.user
             event.save()
-            messages.success(request, "Event created successfully!")  # Added success message
+            messages.success(request, "Event created successfully!")
             return redirect("events:detail", event_id=event.id)
         return render(request, "events/create_event.html", {"form": form})
 
-@login_required
 @require_POST
 def create_event_ajax(request):
+    """
+    AJAX endpoint for creating an event.
+    Returns JSON success or error responses.
+    Requires user to be logged in.
+    """
+    # Check if user is authenticated before processing form
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {
+                "success": False,
+                "errors": {"__all__": ["You must be logged in to create an event."]}
+            },
+            status=403
+        )
+
     form = EventForm(request.POST)
     if form.is_valid():
         event = form.save(commit=False)
         event.organizer = request.user
         event.save()
-        messages.success(request, "Event created successfully!")  # Added success message
+        messages.success(request, "Event created successfully!")
         return JsonResponse({"success": True})
     else:
+        # Return form errors as JSON with 400 status
         return JsonResponse({"success": False, "errors": form.errors}, status=400)
 
 @method_decorator(login_required, name='dispatch')
 class MyEventsView(generic.ListView):
+    """List view for events organized by the logged-in user."""
     model = Event
     template_name = "events/my_events.html"
     context_object_name = "my_events"
 
     def get_queryset(self):
+        # Filter events by organizer
         return Event.objects.filter(organizer=self.request.user).order_by("date_time")
 
 @login_required
 def attendees(request, event_id):
+    """
+    Display a list of attendees for an event.
+    Only accessible by the event organizer.
+    """
     event = get_object_or_404(Event, pk=event_id)
     if event.organizer != request.user:
+        # Redirect if user is not the organizer
         return HttpResponseRedirect(reverse("events:index"))
 
     rsvps = RSVP.objects.filter(event=event).order_by("-timestamp")
     return render(request, "events/attendees.html", {"event": event, "rsvps": rsvps})
 
 def signup(request):
+    """
+    User signup view.
+    """
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            auth_login(request, user)
+            auth_login(request, user)  # Log the user in after signup
             return redirect('events:index')
     else:
         form = UserCreationForm()

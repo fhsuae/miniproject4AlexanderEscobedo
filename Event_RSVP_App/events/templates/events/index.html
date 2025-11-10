@@ -2,10 +2,17 @@
 {% block content %}
 <h1>Upcoming Events</h1>
 
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createEventModal">
-  Create New Event
-</button>
+<!-- Display the "Create New Event" button -->
+<!-- Disable it and show tooltip if user is not logged in -->
+{% if user.is_authenticated %}
+  <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createEventModal">
+    Create New Event
+  </button>
+{% else %}
+  <button type="button" class="btn btn-primary mb-3" disabled title="Login required to create events">
+    Create New Event (Login required)
+  </button>
+{% endif %}
 
 <ul class="list-group">
   {% for event in event_list %}
@@ -61,6 +68,7 @@
 </div>
 
 <script>
+// Attach submit event listener to the event creation form
 document.getElementById('createEventForm').addEventListener('submit', function(e) {
   e.preventDefault();
 
@@ -76,28 +84,30 @@ document.getElementById('createEventForm').addEventListener('submit', function(e
   })
   .then(response => {
     if (!response.ok) {
+      // Parse JSON error response and throw to catch block
       return response.json().then(data => { throw data; });
     }
     return response.json();
   })
   .then(data => {
     if (data.success) {
-      // Close the modal on success
+      // On success, close modal, alert user, and reload page
       const modal = bootstrap.Modal.getInstance(document.getElementById('createEventModal'));
       modal.hide();
 
-      // Show success message and reload page
       alert("Event created successfully!");
       location.reload();
     }
   })
   .catch(errorData => {
-    // ✅ IMPROVED ERROR HANDLING: Show specific form errors
+    // Display detailed form errors or general error messages
     if (errorData.errors) {
       let errorMsg = "Please fix the following errors:\n\n";
       for (let field in errorData.errors) {
-        // Format field names to be more user-friendly
-        const fieldName = field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        // Format the field name, special case for non-field errors (__all__)
+        const fieldName = field === "__all__"
+          ? "General"
+          : field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
         errorMsg += `• ${fieldName}: ${errorData.errors[field].join(', ')}\n`;
       }
       alert(errorMsg);
@@ -108,4 +118,5 @@ document.getElementById('createEventForm').addEventListener('submit', function(e
   });
 });
 </script>
+
 {% endblock %}

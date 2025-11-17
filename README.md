@@ -39,7 +39,7 @@ Before running the project, ensure you have:
 1. Clone the repository:
 
 ```
-https://github.com/fhsuae/miniproject4AlexanderEscobedo.git
+git clone https://github.com/fhsuae/miniproject4AlexanderEscobedo.git
 ```
 2. Create and activate a virtual environment:
 
